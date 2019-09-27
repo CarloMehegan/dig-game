@@ -11,15 +11,15 @@ function love.load()
     tiles[x] = {}
     for y=1,h do
       -- tiles[x][y] = Tile(x*61+100,y*61+300,60,60)
-      tiles[x][y] = Tile( ((x-1) * 40) , ((y-1) * 40) ,40,40)
+      tiles[x][y] = Tile( x, y, 40, 40)
     end
   end
-
-  boy = Boy(40,40)
+  tiles[w/2][h/2].broken = true
+  boy = Boy(w/2,h/2)
 end
 
 function love.update(dt)
-  -- body...
+  boy:Update(dt)
 end
 
 function love.draw()
@@ -46,8 +46,8 @@ function Boy(x,y)
   end
 
   function boy:Draw()
-    love.graphics.setColor(1,1,1,1)
-    love.graphics.draw(boy.img, self.x, self.y, 0, 2)
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(boy.img, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
   end
 
   return boy
@@ -63,14 +63,24 @@ function Tile(x,y,w,h)
 
   tile.a = love.math.random(50,100)/100.0
 
+  tile.broken = false
+
   function tile:Update(dt)
 
   end
 
   function tile:Draw(r,g,b)
-    love.graphics.setColor(r, g, b, self.a)
-    love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
+    if self.broken == false then
+      love.graphics.setColor(r, g, b, self.a)
+      love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
+    end
   end
 
   return tile
+end
+
+
+
+function love.keypressed(key, scancode, isrepeat)
+  -- body...
 end
