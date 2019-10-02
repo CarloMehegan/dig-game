@@ -16,11 +16,17 @@ function love.load()
     end
   end
   tiles[w/2][h/2].broken = true
-  boy = Boy(w/2,h/2)
+  boy = Boy:Create({x = w/2, y = h/2})
 end
 
 function love.update(dt)
   boy:Update(dt)
+
+  for x=1,w do
+    for y=1,h do
+      tiles[x][y]:Update(dt)
+    end
+  end
 end
 
 function love.draw()
@@ -32,46 +38,50 @@ function love.draw()
   boy:Draw()
 end
 
+Boy = {
+  x, y, w = 16, h = 16, img = love.graphics.newImage('diggin boy.png')
+}
+function Boy:Create(boy)
+  local boy = boy or {}
 
-function Boy(x,y)
-  local boy = {}
-
-  boy.x = x
-  boy.y = y
-  boy.w = 16
-  boy.h = 16
-  boy.img = love.graphics.newImage('diggin boy.png')
+  -- boy.x = x
+  -- boy.y = y
+  -- boy.w = 16
+  -- boy.h = 16
+  -- boy.img = love.graphics.newImage('diggin boy.png')
 
   boy.leftpressed = false
   function boy:Update(dt)
-    if onePressKey('a', self.leftpressed) then
-      self.x = self.x + 10
-    end
+
   end
 
   function boy:Draw()
     love.graphics.setColor(1,1,1)
-    love.graphics.draw(boy.img, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
+    love.graphics.draw(self.img, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
   end
 
+  setmetatable(boy, self)
+  self.__index = self
   return boy
 end
 
 Tile = {
-  x, y, w, h, c
+  x, y, w, h, c, s
 }
 function Tile:Create(tile)
   local tile = tile or {}
 
   tile.c = {.71,.40,.11,love.math.random(50,100)/100.0}
   -- tile.a = love.math.random(50,100)/100.0
-
+  tile.s = 1
   tile.broken = false
 
   function tile:Update(dt)
+    if tile
+  end
+  function tile:UpdateGlow()
 
   end
-
   function tile:Draw()
     if self.broken == false then
       love.graphics.setColor(self.c)
@@ -86,11 +96,10 @@ end
 
 
 
-function love.keypressed(key, scancode, isrepeat)
-  -- body...
-end
 
-function onePressKey(key, bool)
+
+
+function onePressKey(key, bool) -- doesnt work for nothin
   if love.keyboard.isDown(key) and bool == false then
     bool = true
     return true
