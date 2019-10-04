@@ -68,7 +68,7 @@ end
 
 function love.update(dt)
   boy:Update(dt)
-  if tiles[boy.x][boy.y+1].broken == true then
+  if tiles[boy.x][boy.y+1] and tiles[boy.x][boy.y+1].broken == true then
     boy.y = boy.y + 1
   end
   if tiles[boy.x][boy.y].name == "cave" and cavefound == false then
@@ -149,7 +149,7 @@ function Mine(x,y)
   if tiles[x][y].broken == false then
     if tiles[x][y].name == "gem" then
       tiles[x][y].a = tiles[x][y].a + boy.power/3
-      tiles[x][y].c = {.90,.23,.23, tiles[x][y].a}
+      tiles[x][y].c = {.90,.1,.1, tiles[x][y].a}
     else
       tiles[x][y].a = tiles[x][y].a + boy.power
       tiles[x][y].c = {.71,.40,.11, tiles[x][y].a}
@@ -207,7 +207,7 @@ function Tile:Create(tile)
   function tile:Draw(prox)
     if self.broken == false then
       if self.name == "gem" and cavefound then
-        love.graphics.setColor(.90,.1,.1,1/(prox/gemshine))
+        love.graphics.setColor(.90,.1,.1,1/(prox/gemshine/self.a))
         love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
       end
       love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox))
