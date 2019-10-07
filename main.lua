@@ -11,9 +11,9 @@
 
 tiles = {}
 function love.load()
-  -- love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
-  w = math.random(10,35)
-  h = math.random(7,20)
+  -- best to keep width and height greater than 5
+  w = love.math.random(10,35)
+  h = love.math.random(7,20)
   cavefound = false
   love.window.setMode(40*w, 40*h)
   for x=1,w do
@@ -53,9 +53,32 @@ function love.load()
         gemshine = 0
         gemshinefade = false
       else
-        tiles[w/2][h/2].name = "gem"
+        tiles[math.floor(w/2)][math.floor(h/2)].name = "gem"
       end
     end
+  end
+  -- algorithm end ========================================================
+
+  -- algorithm start ======================================================
+  local x = love.math.random(2,w-1)
+  local y = love.math.random(2,h-1)
+
+  for i = 1, 5 do
+
+    local dx = love.math.random(-1,1)
+    local dy = love.math.random(-1,1)
+
+    if x + dx > 0 and x + dx < w and y + dy > 0 and y + dy < h then
+      tiles[x+dx][y+dy].name = "diamond"
+    end
+
+    if x + dx > 0 and x + dx <= w then
+      x = x + dx
+    end
+    if y + dy > 0 and y + dy <= h then
+      y = y + dy
+    end
+
   end
   -- algorithm end ========================================================
 
@@ -209,9 +232,21 @@ function Tile:Create(tile)
       if self.name == "gem" and cavefound then
         love.graphics.setColor(.90,.1,.1,1/(prox/gemshine/self.a))
         love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
+      elseif self.name == "diamond" then
+        love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox)) -- dirt
+        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
+        love.graphics.setColor(50/255,181/255,237/255,self.c[4]/(prox)) -- diamond
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 10, ((self.y-1)*40) + 10, self.w/4, self.h/4)
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 20, ((self.y-1)*40) + 26, self.w/4, self.h/4)
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 25, ((self.y-1)*40) + 19, self.w/4, self.h/6)
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 30, ((self.y-1)*40) + 7, self.w/6, self.h/6)
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 3, ((self.y-1)*40) + 13, self.w/6, self.h/6)
+        love.graphics.rectangle("fill", ((self.x-1)*40) + 5, ((self.y-1)*40) + 20, self.w/6, self.h/6)
+        -- love.graphics.rectangle("fill", ((self.x-1)*40) + 5, ((self.y-1)*40) + 5, self.w - 10, self.h - 10)
+      else
+        love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox))
+        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
       end
-      love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox))
-      love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
     elseif self.broken == true then
       if self.name == "cave" and cavefound then
         love.graphics.setColor(0.2,0.1,0.1,.8/(prox/15)) --cave is glowy red
@@ -221,6 +256,8 @@ function Tile:Create(tile)
       love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
     end
   end
+
+  
 
   setmetatable(tile, self)
   self.__index = self
