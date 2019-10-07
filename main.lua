@@ -12,8 +12,8 @@
 tiles = {}
 function love.load()
   -- love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
-  w = 30
-  h = 20
+  w = math.random(10,35)
+  h = math.random(7,20)
   cavefound = false
   love.window.setMode(40*w, 40*h)
   for x=1,w do
@@ -26,15 +26,15 @@ function love.load()
 
 
   -- algorithm start ======================================================
-  local x = w/2
-  local y = h/2
+  local x = math.floor(w/2)
+  local y = math.floor(h/2)
 
   for i = 1, 50 do
 
     local dx = love.math.random(-1,1)
     local dy = love.math.random(-1,1)
 
-    if x + dx > 0 and x + dx <= w and y + dy > 0 and y + dy <= h then
+    if x + dx > 0 and x + dx < w and y + dy > 0 and y + dy < h then
       tiles[x+dx][y+dy].broken = true
       tiles[x+dx][y+dy].name = "cave"
     end
@@ -137,7 +137,7 @@ function Move(key)
   end
   if key == "w" and boy.y > 1 then
     if tiles[boy.x][boy.y-1].broken == true then
-      -- boy.y = boy.y = 1
+      -- boy.y = boy.y -1 see below
     elseif tiles[boy.x][boy.y-1].broken == false then
       Mine(boy.x, boy.y-1)
     end
