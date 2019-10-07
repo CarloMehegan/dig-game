@@ -15,6 +15,7 @@ function love.load()
   w = love.math.random(10,35)
   h = love.math.random(7,20)
   cavefound = false
+  ladderimg = love.graphics.newImage('ladder.png')
   love.window.setMode(40*w, 40*h)
   for x=1,w do
     tiles[x] = {}
@@ -92,7 +93,9 @@ end
 function love.update(dt)
   boy:Update(dt)
   if tiles[boy.x][boy.y+1] and tiles[boy.x][boy.y+1].broken == true then
-    boy.y = boy.y + 1
+    if tiles[boy.x][boy.y+1].name ~= "ladder" then
+      boy.y = boy.y + 1
+    end
   end
   if tiles[boy.x][boy.y].name == "cave" and cavefound == false then
     cavefound = true
@@ -160,7 +163,8 @@ function Move(key)
   end
   if key == "w" and boy.y > 1 then
     if tiles[boy.x][boy.y-1].broken == true then
-      -- boy.y = boy.y -1 see below
+      tiles[boy.x][boy.y].name = "ladder"
+      boy.y = boy.y-1
     elseif tiles[boy.x][boy.y-1].broken == false then
       Mine(boy.x, boy.y-1)
     end
@@ -187,6 +191,8 @@ end
 
 Boy = {
   x, y, w = 16, h = 16, img = love.graphics.newImage('diggin boy.png'), power = 0.2
+  -- ladder = love.graphics.newImage('ladder.png'),
+  -- ladderDeployed = false, ladderx, laddery
 }
 function Boy:Create(boy)
   local boy = boy or {}
@@ -201,10 +207,13 @@ function Boy:Create(boy)
 
   end
 
-
   function boy:Draw()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.img, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
+    -- if ladderDeployed then
+    --   love.graphics.setColor(1,1,1)
+    --   love.graphics.draw(self.ladder, (self.ladderx-1)*40, (self.laddery-1)*40, 0, 0.25)
+    -- end
   end
 
   setmetatable(boy, self)
@@ -248,16 +257,20 @@ function Tile:Create(tile)
         love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
       end
     elseif self.broken == true then
+      love.graphics.setColor(0.2,0.2,0.2,.8/(prox/3))
+      love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
       if self.name == "cave" and cavefound then
         love.graphics.setColor(0.2,0.1,0.1,.8/(prox/15)) --cave is glowy red
         love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
       end
-      love.graphics.setColor(0.2,0.2,0.2,.8/(prox/3))
-      love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
+      if self.name == "ladder" then
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(ladderimg, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
+      end
+      -- love.graphics.setColor(0.2,0.2,0.2,.8/(prox/3))
+      -- love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
     end
   end
-
-  
 
   setmetatable(tile, self)
   self.__index = self
