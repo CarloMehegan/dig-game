@@ -7,9 +7,12 @@
 -- You are a miner looking for a secret cavern.
 -- The cavern contains the rarest gem in the world.
 -- Go find the cavern and get the gem.
--- tip- darker rocks = harder to break
+-- tip: darker rocks = harder to break
 
+local Boy = require 'boy'
+local Tile = require 'tile'
 tiles = {}
+
 function love.load()
   -- best to keep width and height greater than 5
   w = love.math.random(10,35)
@@ -17,16 +20,16 @@ function love.load()
   cavefound = false
   ladderimg = love.graphics.newImage('ladder.png')
   love.window.setMode(40*w, 40*h)
-  for x=1,w do
+
+  for x=1,w do --creating tile grid
     tiles[x] = {}
     for y=1,h do
-      -- tiles[x][y] = Tile(x*61+100,y*61+300,60,60)
-      tiles[x][y] = Tile:Create( {x = x, y = y, w = 40, h = 40} )
+      tiles[x][y] = Tile:new(x, y)
     end
   end
 
-
   -- algorithm start ======================================================
+  -- placing cave
   local x = math.floor(w/2)
   local y = math.floor(h/2)
 
@@ -61,6 +64,7 @@ function love.load()
   -- algorithm end ========================================================
 
   -- algorithm start ======================================================
+  -- placing diamond bunch
   local x = love.math.random(2,w-1)
   local y = love.math.random(2,h-1)
 
@@ -83,17 +87,16 @@ function love.load()
   end
   -- algorithm end ========================================================
 
-
-  for x=1, w do
+  for x=1, w do -- creating Boy, clearing top row of tiles
     tiles[x][1].broken = true
   end
-  boy = Boy:Create({x = 3, y = 1})
+  boy = Boy:new(3, 1)
 end
 
 function love.update(dt)
-  boy:Update(dt)
+  boy:update(dt)
   if tiles[boy.x][boy.y+1] and tiles[boy.x][boy.y+1].broken == true then
-    if tiles[boy.x][boy.y+1].name ~= "ladder" then
+    if tiles[boy.x][boy.y+1].ladder == false then
       boy.y = boy.y + 1
     end
   end
@@ -117,7 +120,7 @@ function love.update(dt)
   end
   for x=1,w do
     for y=1,h do
-      tiles[x][y]:Update(dt)
+      tiles[x][y]:update(dt)
     end
   end
 end
@@ -126,10 +129,10 @@ function love.draw()
   for x=1,w do
     for y=1,h do
       prox = FindProximity(x,y)
-      tiles[x][y]:Draw(prox)
+      tiles[x][y]:draw(prox)
     end
   end
-  boy:Draw()
+  boy:draw()
 end
 
 function FindProximity(x,y)
@@ -163,7 +166,7 @@ function Move(key)
   end
   if key == "w" and boy.y > 1 then
     if tiles[boy.x][boy.y-1].broken == true then
-      tiles[boy.x][boy.y].name = "ladder"
+      tiles[boy.x][boy.y].ladder = true
       boy.y = boy.y-1
     elseif tiles[boy.x][boy.y-1].broken == false then
       Mine(boy.x, boy.y-1)
@@ -189,96 +192,6 @@ function Mine(x,y)
 end
 
 
-Boy = {
-  x, y, w = 16, h = 16, img = love.graphics.newImage('diggin boy.png'), power = 0.2
-  -- ladder = love.graphics.newImage('ladder.png'),
-  -- ladderDeployed = false, ladderx, laddery
-}
-function Boy:Create(boy)
-  local boy = boy or {}
-
-  -- boy.x = x
-  -- boy.y = y
-  -- boy.w = 16
-  -- boy.h = 16
-  -- boy.img = love.graphics.newImage('diggin boy.png')
-
-  function boy:Update(dt)
-
-  end
-
-  function boy:Draw()
-    love.graphics.setColor(1,1,1)
-    love.graphics.draw(self.img, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
-    -- if ladderDeployed then
-    --   love.graphics.setColor(1,1,1)
-    --   love.graphics.draw(self.ladder, (self.ladderx-1)*40, (self.laddery-1)*40, 0, 0.25)
-    -- end
-  end
-
-  setmetatable(boy, self)
-  self.__index = self
-  return boy
-end
-
-Tile = {
-  x, y, w, h, c, s, name
-}
-function Tile:Create(tile)
-  local tile = tile or {}
-  tile.a = love.math.random(40,90)/100.0
-  tile.c = {.71,.40,.11, tile.a}
-  -- tile.a = love.math.random(50,100)/100.0
-  tile.s = 1
-  tile.broken = false
-
-  function tile:Update(dt)
-
-  end
-
-  function tile:Draw(prox)
-    if self.broken == false then
-      if self.name == "gem" and cavefound then
-        love.graphics.setColor(.90,.1,.1,1/(prox/gemshine/self.a))
-        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-      elseif self.name == "diamond" then
-        love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox)) -- dirt
-        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-        love.graphics.setColor(50/255,181/255,237/255,self.c[4]/(prox)) -- diamond
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 10, ((self.y-1)*40) + 10, self.w/4, self.h/4)
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 20, ((self.y-1)*40) + 26, self.w/4, self.h/4)
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 25, ((self.y-1)*40) + 19, self.w/4, self.h/6)
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 30, ((self.y-1)*40) + 7, self.w/6, self.h/6)
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 3, ((self.y-1)*40) + 13, self.w/6, self.h/6)
-        love.graphics.rectangle("fill", ((self.x-1)*40) + 5, ((self.y-1)*40) + 20, self.w/6, self.h/6)
-        -- love.graphics.rectangle("fill", ((self.x-1)*40) + 5, ((self.y-1)*40) + 5, self.w - 10, self.h - 10)
-      else
-        love.graphics.setColor(self.c[1],self.c[2],self.c[3],self.c[4]/(prox))
-        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-      end
-    elseif self.broken == true then
-      love.graphics.setColor(0.2,0.2,0.2,.8/(prox/3))
-      love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-      if self.name == "cave" and cavefound then
-        love.graphics.setColor(0.2,0.1,0.1,.8/(prox/15)) --cave is glowy red
-        love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-      end
-      if self.name == "ladder" then
-        love.graphics.setColor(1,1,1)
-        love.graphics.draw(ladderimg, (self.x-1)*40, (self.y-1)*40, 0, 0.25)
-      end
-      -- love.graphics.setColor(0.2,0.2,0.2,.8/(prox/3))
-      -- love.graphics.rectangle("fill", (self.x-1)*40, (self.y-1)*40, self.w, self.h)
-    end
-  end
-
-  setmetatable(tile, self)
-  self.__index = self
-  return tile
-end
-
-
-
 function love.keypressed(key, scancode, isrepeat)
   if key == "escape" then
     love.event.quit()
@@ -294,17 +207,5 @@ function love.keypressed(key, scancode, isrepeat)
   end
   if key == "w" then
     Move("w")
-  end
-end
-
-function onePressKey(key, bool) -- doesnt work for nothin
-  if love.keyboard.isDown(key) and bool == false then
-    bool = true
-    return true
-  elseif love.keyboard.isDown(key) == false and bool == true then
-    bool = false
-    return false
-  elseif love.keyboard.isDown(key) == true and bool == true then
-    return false
   end
 end
