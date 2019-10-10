@@ -30,8 +30,10 @@ function love.load()
 
   -- algorithm start ======================================================
   -- placing cave
-  local x = math.floor(w/2)
-  local y = math.floor(h/2)
+  -- local x0 = math.floor(w/2)
+  -- local y0 = math.floor(h/2)
+  local x = love.math.random(math.floor(w/4),math.floor(3*w/4))
+  local y = love.math.random(math.floor(h/4),math.floor(3*h/4))
 
   for i = 1, 50 do
 
@@ -51,7 +53,7 @@ function love.load()
     end
 
     if i == 50 then
-      if x + dx > 0 and x + dx <= w and y + dy > 0 and y + dy <= h then
+      if x + dx > 0 and x + dx <= w and y + dy > 1 and y + dy <= h then
         tiles[x+dx][y+dy].broken = false
         tiles[x+dx][y+dy].name = "gem"
         gemshine = 0
